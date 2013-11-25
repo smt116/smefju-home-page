@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Graph Database - Neo4j</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+
+      body {
+        font-size: 26px;
+      }
+      pre { font-size: 22px; }
+      body, h1, h2, h3 {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      h1 { font-size: 3.5em; }
+      h2 { font-size: 2em; }
+      h3 { font-size: 1.6em; }
+      li p { line-height: 1.25em; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Graph Database
+## Neo4j
+### Maciej Małecki
+
+smt116@gmail.com
+
+@smt116 @smefju
+
+---
+
+class: center, middle
+
+# Czym jest graf?
+
+---
+
+class: center
+
+### Graf nieskierowany:
+
+![](undirected_graph.svg)
+
+----
+
+### Graf skierowany:
+
+![](directed_graph.svg)
+
+---
+
+class: middle
+
+## Czym jest **grafowa** baza danych?
+
+(graf skierowany z atrybutam)
+
+* graf składa się z węzłów i/lub krawędzi
+* krawędzie są nazwane i skierowane
+* węzły i krawędzie mogą mieć atrybuty
+
+---
+
+class: middle
+
+## Czym jest grafowa **baza danych**?
+
+* ACID - wszystko w obrębie atomowych transakcji
+* obsługa duuuuużej ilości danych
+* wydajność! (czas poruszania się po grafie jest stały)
+* skalowalność (master-slave, dzielenie podgrafów?)
+
+---
+
+class: middle
+
+## Modelowanie w relacyjnej bazie danych
+
+* diagram wstępny
+* diagram ER
+* struktura tabel, relacje, klucze, ...
+* normalizacja
+* optymalizacja
+
+---
+
+class: middle
+
+## Modelowanie w grafowej bazie danych
+
+* diagram wstępny
+* implementacja diagramu w bazie
+* **KONIEC**
+
+---
+
+class: center, middle
+
+![](neodb_example_1.png)
+
+---
+
+##### Person
+```
+id | name
+----
+1 | Bob
+2 | Tony
+3 | Mark
+```
+##### Restaurant
+```
+id | name
+----
+1 | Zushi Zam
+2 | iSushi
+```
+
+---
+
+##### Menu
+```
+id | name
+----
+1 | Sushi
+```
+##### Locations
+```
+id | City
+----
+1 | New York
+```
+## ! + relacje !
+---
+class: center, middle
+
+![](neodb_example_2.jpg)
+---
+
+class: center, middle
+
+# Neo4j
+
+[neo4j.org](http://neo4j.org/)
+
+---
+
+class: center, middle
+
+# vs
+
+PostgreSQL powie Ci jaka jest średnia wieku osób obecnych w tej sali.
+
+Neo4j powie Ci kto z obecnych tu osób najprawdopodobniej postawiłby Ci piwo.
+
+---
+
+class: center, middle
+
+# Instalacja
+
+http://www.neo4j.org/download
+
+---
+
+class: middle, center
+
+# Webadmin
+
+http://localhost:7474/webadmin
+
+---
+
+class: middle, center
+
+# Prosta baza danych
+
+---
+
+```
+CREATE
+
+  (matrix1 {
+    id : '603',
+    title : 'The Matrix',
+    year : '1999-03-31'
+  }),
+
+  (matrix2 {
+    id : '604',
+    title : 'The Matrix Reloaded',
+    year : '2003-05-07'
+  }),
+
+  (matrix3 {
+    id : '605',
+    title : 'The Matrix Revolutions',
+    year : '2003-10-27'
+  }),
+
+...
+```
+
+---
+
+```
+...
+
+  (neo {
+    name:'Keanu Reeves'
+  }),
+
+  (morpheus {
+    name:'Laurence Fishburne'
+  }),
+
+  (trinity {
+    name:'Carrie-Anne Moss'
+  }),
+
+...
+```
+
+---
+
+```
+...
+
+  (neo)-[:ACTS_IN { role : 'Neo' }]->(matrix1),
+  (neo)-[:ACTS_IN { role : 'Neo' }]->(matrix2),
+  (neo)-[:ACTS_IN { role : 'Neo' }]->(matrix3),
+
+  (morpheus)-[:ACTS_IN { role : 'Morpheus' }]->(matrix1),
+  (morpheus)-[:ACTS_IN { role : 'Morpheus' }]->(matrix2),
+  (morpheus)-[:ACTS_IN { role : 'Morpheus' }]->(matrix3),
+
+  (trinity)-[:ACTS_IN { role : 'Trinity' }]->(matrix1),
+  (trinity)-[:ACTS_IN { role : 'Trinity' }]->(matrix2),
+  (trinity)-[:ACTS_IN { role : 'Trinity' }]->(matrix3),
+
+  (neo)<-[:LOVES]->(trinity)
+  (neo)<-[:KNOWS]->(morpheus)
+  (morpheus)<-[:KNOWS]->(trinity)
+
+;
+```
+
+---
+
+class: middle, center
+
+# Przykładowe zapytania
+
+http://www.neo4j.org/learn/cypher
+
+---
+
+## Aktorzy, którzy grają w danym filmie
+
+```
+START movie = node:node_auto_index(title="The Matrix")
+  MATCH (movie)<-[:ACTS_IN]-(actor)
+  RETURN actor.name order by actor.name;
+```
+
+```
+==> +----------------------+
+==> | actor.name           |
+==> +----------------------+
+==> | "Carrie-Anne Moss"   |
+==> | "Keanu Reeves"       |
+==> | "Laurence Fishburne" |
+==> +----------------------+
+==> 3 rows
+==> 
+==> 57 m
+```
+
+---
+
+## Ilość aktorów, którzy grają w danym filmie
+
+```
+START movie = node:node_auto_index(title="The Matrix")
+  MATCH (movie)<-[:ACTS_IN]-(actor)
+  RETURN count(*);
+```
+
+```
+==> +----------+
+==> | count(*) |
+==> +----------+
+==> | 3        |
+==> +----------+
+==> 1 row
+==> 
+==> 93 ms
+```
+
+---
+
+## Nody i ich relacje
+
+```
+START n=node(*)
+  MATCH (n)-[r]->(m)
+  RETURN n as from,
+         r as `->`,
+         m as to;
+```
+
+```
+==> +-----------------------------------------------------------------------------------------------------------------------------------------+
+==> | from                               | ->                            | to                                                                 |
+==> +-----------------------------------------------------------------------------------------------------------------------------------------+
+==> | Node[1]{name:"Carrie-Anne Moss"}   | :ACTS_IN[6] {role:"Trinity"}  | Node[6]{id:"603",title:"The Matrix",year:"1999-03-31"}             |
+==> | Node[1]{name:"Carrie-Anne Moss"}   | :ACTS_IN[7] {role:"Trinity"}  | Node[5]{id:"604",title:"The Matrix Reloaded",year:"2003-05-07"}    |
+==> | Node[1]{name:"Carrie-Anne Moss"}   | :ACTS_IN[8] {role:"Trinity"}  | Node[4]{id:"605",title:"The Matrix Revolutions",year:"2003-10-27"} |
+==> | Node[2]{name:"Laurence Fishburne"} | :ACTS_IN[3] {role:"Morpheus"} | Node[6]{id:"603",title:"The Matrix",year:"1999-03-31"}             |
+==> | Node[2]{name:"Laurence Fishburne"} | :ACTS_IN[4] {role:"Morpheus"} | Node[5]{id:"604",title:"The Matrix Reloaded",year:"2003-05-07"}    |
+==> | Node[2]{name:"Laurence Fishburne"} | :ACTS_IN[5] {role:"Morpheus"} | Node[4]{id:"605",title:"The Matrix Revolutions",year:"2003-10-27"} |
+==> | Node[2]{name:"Laurence Fishburne"} | :KNOWS[10] {}                 | Node[3]{name:"Keanu Reeves"}                                       |
+==> | Node[2]{name:"Laurence Fishburne"} | :KNOWS[11] {}                 | Node[1]{name:"Carrie-Anne Moss"}                                   |
+==> | Node[3]{name:"Keanu Reeves"}       | :ACTS_IN[0] {role:"Neo"}      | Node[6]{id:"603",title:"The Matrix",year:"1999-03-31"}             |
+==> | Node[3]{name:"Keanu Reeves"}       | :ACTS_IN[1] {role:"Neo"}      | Node[5]{id:"604",title:"The Matrix Reloaded",year:"2003-05-07"}    |
+==> | Node[3]{name:"Keanu Reeves"}       | :ACTS_IN[2] {role:"Neo"}      | Node[4]{id:"605",title:"The Matrix Revolutions",year:"2003-10-27"} |
+==> | Node[3]{name:"Keanu Reeves"}       | :LOVE[9] {}                   | Node[1]{name:"Carrie-Anne Moss"}                                   |
+==> +-----------------------------------------------------------------------------------------------------------------------------------------+
+==> 12 rows
+==> 
+==> 55 ms
+```
+
+---
+
+## W czym grają znajomi ukochanej Neo??
+
+```
+START neo=node:node_auto_index(name="Keanu Reeves")
+  MATCH (neo)<-[:LOVES]->(person)-
+          [r:KNOWS]-(friend)-
+          [r2:ACTS_IN]->(movie)
+  RETURN movie.title, collect(r2.role) as actors;
+```
+
+```
+==> +-----------------------------------------+
+==> | movie.title              | actors       |
+==> +-----------------------------------------+
+==> | "The Matrix Revolutions" | ["Morpheus"] |
+==> | "The Matrix"             | ["Morpheus"] |
+==> | "The Matrix Reloaded"    | ["Morpheus"] |
+==> +-----------------------------------------+
+==> 3 rows
+==> 
+==> 83 ms
+```
+
+---
+
+class: middle, center
+
+# Przeglądanie grafu
+
+http://www.neo4j.org/develop/visualize
+
+---
+
+## Protip: jak wyczyścić bazę danych
+
+```
+START n=node(*) 
+  MATCH n-[r?]-m 
+  WITH n, r 
+  DELETE n, r;
+```
+```
+==> +-------------------+
+==> | No data returned. |
+==> +-------------------+
+==> Nodes deleted: 6
+==> Relationships deleted: 12
+==> 
+==> 42 ms
+```
+
+---
+
+class: middle, center
+
+# Drivers
+
+http://www.neo4j.org/develop/drivers
+
+---
+
+class: middle, center
+
+# (j?)Ruby
+###### Java, .NET, Python, C, Go... sorry
+
+---
+
+class: middle
+
+```bash
+$ rvm install jruby
+$ rvm use jruby
+
+$ gem install neo4j
+```
+
+```ruby
+require 'rubygems'
+require 'bundler/setup'
+require 'neo4j'
+ 
+Neo4j::Transaction.run do
+  # ...
+end
+```
+
+---
+
+### Zapytania raz jeszcze
+
+```ruby
+# Aktorzy, którzy grają w danym filmie
+puts matrix1.incoming(:acts_in).map{|node| node[:name]}.sort
+
+# Ilość aktorów, którzy grają w danym filmie
+puts matrix1.incoming(:acts_in).count
+
+# W czym grają znajomi ukochanej Neo??
+neo.both(:loves).map do |love|
+  puts "#{neo[:name].green} loves #{love[:name].green}"
+  love.outgoing(:knows).map do |friend|
+    puts "#{love[:name].green} knows #{friend[:name].green}"
+    name    = friend[:name]
+    acts_in = friend.outgoing(:acts_in).map do |movie|
+      movie[:title]
+    end
+    puts "#{name.green} acts in #{acts_in.join(', ').green}"
+  end
+end
+```
+---
+
+class: middle, center
+
+# Trochę liczb
+[Porównanie @db-engines.com](http://db-engines.com/en/system/Neo4j%3BPostgreSQL%3BMongoDB%3BRedis)
+
+---
+
+class: middle, center
+
+## Czy potrzebuje grafowej bazy danych?
+
+---
+
+class: middle, center
+
+## Czy to ma przyszłość?
+
+---
+
+class: middle, center
+
+## Co dalej?
+
+http://www.neo4j.org/learn
+
+---
+
+class: center, middle
+
+### Maciej Małecki
+
+smt116@gmail.com
+
+###### [remark](http://github.com/gnab/remark)
+
+    </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-0.5.9.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
