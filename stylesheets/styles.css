@@ -135,6 +135,10 @@ dl p {
   font-style: italic;
 }
 
+i {
+  font-style: italic;
+}
+
 hr {
   border:0;
   background:#ccc;
