@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Arvo:400,700,400italic);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700&subset=latin,latin-ext);
 
 /* MeyerWeb Reset */
 
@@ -47,7 +47,7 @@ p, ul, ol, table, dl {
 }
 
 h1, h2, h3 {
-  font-family: 'Arvo', Monaco, serif;
+  font-family: 'Open Sans', Monaco, serif;
   line-height:1.3;
   font-weight: normal;
 }
@@ -71,7 +71,7 @@ h3 {
 }
 
 h4, h5, h6 {
-  font-family: 'Arvo', Monaco, serif;
+  font-family: 'Open Sans', Monaco, serif;
   font-weight: 700;
 }
 
@@ -189,7 +189,7 @@ table {
 }
 
 th {
-  font-family: 'Arvo', Helvetica, Arial, sans-serif;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
   font-size: 18px;
   font-weight: normal;
   background: #232323;
@@ -236,7 +236,7 @@ p.header {
 }
 
 h1.header {
-  font-family: 'Arvo', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-size: 30px;
   font-weight: 300;
   line-height: 1.3em;
