@@ -8,10 +8,10 @@
       @import url(http://fonts.googleapis.com/css?family=Wellfleet&subset=latin,latin-ext);
 
       body {
-        font-size: 26px;
+        font-size: 1.4em;
         font-family: 'Droid Serif';
       }
-      pre { font-size: 22px; }
+      pre { font-size: 1.2em; }
       h1, h2, h3, .corner-title {
         font-family: 'Wellfleet';
       }
@@ -31,6 +31,9 @@
         color: #666;
         font-size: 36px;
       }
+
+      .remark-slide-content.smaller-fonts { padding: 0; }
+      .smaller-fonts .remark-code { font-size: 0.8em; }
     </style>
   </head>
   <body>
@@ -101,10 +104,10 @@ class: middle
 .corner-title[Simple programming model]
 ### Indexes...
 
-* simple indexes
-* compound indexes
-* multi indexes
-* indexes build with arbitrary expressions
+* simple
+* compound
+* multi
+* build with arbitrary expressions
 
 ---
 
@@ -163,6 +166,27 @@ http://www.rethinkdb.com/docs/install/
 
 ---
 
+class: middle, smaller-fonts
+
+##.center[Running the server]
+
+```bash
+~/repos/smefju-home-page/presentations/rethinkdb
+ $ rethinkdb 
+ info: Running rethinkdb 1.11.2-0ubuntu1~saucy (GCC 4.8.1)...
+ info: Running on Linux 3.11.0-12-generic x86_64
+ info: Loading data from directory /home/smefju/tmp/rethinkdb/rethinkdb_data
+ info: Listening for intracluster connections on port 29015
+ info: Listening for client driver connections on port 28015
+ info: Listening for administrative HTTP connections on port 8080
+ info: Listening on addresses: 127.0.0.1, 127.0.1.1, ::1
+ info: To fully expose RethinkDB on the network, bind to all addresses
+ info: by running rethinkdb with the `--bind all` command line option.
+ info: Server ready
+```
+
+---
+
 class: center, middle
 
 ## Web UI
@@ -173,8 +197,6 @@ http://localhost:8080/
 
 class: center, middle
 
-<!-- WIP -->
-
 ## ReQL
 
 [cheat sheet](http://www.rethinkdb.com/docs/sql-to-reql/)
@@ -183,9 +205,182 @@ class: center, middle
 
 class: center, middle
 
+## Data modeling
+##### Blog has the authors, the authors have posts.
+http://www.rethinkdb.com/docs/data-modeling/
+
+---
+
+class: center, middle
+
+### Embedded arrays vs multiple tables
+
+---
+
+class: center, middle
+
+.corner-title[Data modeling]
+### Embedded arrays
+
+---
+
+class: middle
+.corner-title[Data modeling - embedded arrays]
+
+```json
+# authors table
+{
+  id: 123,
+  name: "Maciek",
+  posts: [
+    { title: "Introduction to RethinkDB" },
+    { title: "Neo4j as a graph Database" },
+    ...
+  ]
+}
+```
+
+```ruby
+# Retrieve all authors with their posts
+r.db("blog").table("authors")
+
+# Retrieve a single author with his posts
+r.db("blog").table("authors").get(ID)
+```
+---
+
+class: center, middle
+
+.corner-title[Data modeling]
+### Multiple tables
+
+---
+
+class: middle
+.corner-title[Data modeling - multiple tables]
+
+```json
+# authors table
+{
+  id: 123
+  name: "Maciek"
+}
+
+# posts table
+{
+  id: 1,
+  authors_id: 123
+  title: "Introduction to RethinkDB"
+},
+{
+  id: 2,
+  authors_id: 123,
+  title: "Neo4j as a graph Database"
+}
+```
+
+---
+
+class: middle
+.corner-title[Data modeling - multiple tables]
+
+```ruby
+# with a secondary index on the `authors_id` field
+# in the `posts` table
+r.db("blog").table("posts").
+  getAll(123, {index: "authors_id"})
+
+# without a secondary index
+r.db("blog").table("posts").
+  filter({"authors_id": 123})
+
+# with a secondary index on the `authors_id` field
+# in the `posts` table
+r.db('blog').table('authors').getAll(123).eqJoin(
+  'id',
+  r.db('blog').table('posts'),
+  {
+    index:'authors_id'
+  }
+).zip()
+```
+
+---
+
+class: center, middle
+
 ## Drivers
 
 http://www.rethinkdb.com/docs/install-drivers/
+
+---
+
+class: middle
+
+## Ruby
+
+```bash
+ $ gem install rethinkdb
+Fetching: ruby-protocol-buffers-1.5.1.gem (100%)
+Successfully installed ruby-protocol-buffers-1.5.1
+Fetching: rethinkdb-1.11.0.1.gem (100%)
+Successfully installed rethinkdb-1.11.0.1
+2 gems installed
+```
+
+---
+
+class: middle
+
+```ruby
+require 'rubygems'
+require 'rethinkdb'
+
+include RethinkDB::Shortcuts
+
+r.connect(host: 'localhost', port: 28015).repl
+db = r.dbCreate('ruby_test')
+db.table_create('students').run
+db.table('students').insert({
+  name:   'Maciek',
+  index:  194930
+}).run
+
+db.table('students').run
+```
+
+---
+
+class: center, middle
+
+## Pastie
+#### using RethinkDB and Sinatra
+
+https://github.com/rethinkdb/rethinkdb-example-sinatra-pastie
+
+---
+
+class: center, middle
+
+## Start a cluster
+
+http://www.rethinkdb.com/docs/start-a-cluster/
+
+---
+
+class: center, middle
+
+## RethinkDB vs MongoDB
+
+http://www.rethinkdb.com/docs/comparison-tables/
+
+---
+
+class: center, middle
+
+## The future
+
+http://www.rethinkdb.com/blog/funding/
 
 ---
 
