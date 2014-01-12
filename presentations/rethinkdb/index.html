@@ -293,7 +293,9 @@ r.db("blog").table("posts").
 # without a secondary index
 r.db("blog").table("posts").
   filter({"authors_id": 123})
+```
 
+```ruby
 # with a secondary index on the `authors_id` field
 # in the `posts` table
 r.db('blog').table('authors').getAll(123).eqJoin(
@@ -339,14 +341,17 @@ require 'rethinkdb'
 include RethinkDB::Shortcuts
 
 r.connect(host: 'localhost', port: 28015).repl
-db = r.dbCreate('ruby_test')
-db.table_create('students').run
+db = r.db('test')
+db.table_create('students').run rescue nil
 db.table('students').insert({
   name:   'Maciek',
   index:  194930
 }).run
 
-db.table('students').run
+db.table('students').run.each do |student|
+  puts "[#{student['id']}] #{student['name']}" \
+       "(#{student['index']})"
+end
 ```
 
 ---
