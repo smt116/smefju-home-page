@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for i in {1..$(($1))}
+do
+  rethinkdb \
+    --port-offset $(($i+2)) \
+    --directory rethinkdb_data$i \
+    --join localhost:29015 \
+    --pid-file ~/tmp/pid_rethinkdb_$i.pid \
+    --daemon
+  sleep 1
+done
