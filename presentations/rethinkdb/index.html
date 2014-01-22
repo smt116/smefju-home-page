@@ -191,14 +191,7 @@ class: middle
 
 .corner-title[Horizontal scalability]
 ### Replication to multiple nodes
-
-???
-
-RethinkDB allows you to shard and replicate your cluster on a per-table basis.
-
-Sharding a table is as easy as typing the number of shards you'd like in the web admin and clicking 'Rebalance'. RethinkDB rebalances the table, creates copies in the cluster, and moves necessary data around behind the scenes without any additional work from the user. Similarly, to change the number of replicas you simply set the number in the web UI and hit 'Save'.
-
-Sharding and replication settings can also be controlled from a powerful command-line interface: rethinkdb admin.
+###### Per table
 
 ---
 
@@ -213,12 +206,6 @@ class: middle
 
 .corner-title[Horizontal scalability]
 ### Lock-free operation via MVCC concurrency.
-
-???
-
-To efficiently perform concurrent query execution RethinkDB implements block-level multiversion concurrency control (MVCC). Whenever a write operation occurs while there is an ongoing read, RethinkDB takes a snapshot of the B-Tree for each relevant shard and temporarily maintains different versions of the blocks in order to execute read and write operations concurrently. From the perspective of the applications written on top of RethinkDB, the system is essentially lock-free— you can run an hour-long analytics query on a live system without blocking any real-time reads or writes.
-
-RethinkDB does take exclusive block-level locks in case multiple writes are performed on documents that are close together in the B-Tree. If the contested block is cached in memory, these locks are extremely short-lived. If the blocks need to be loaded from disk, these locks take longer. Typically this does not present performance problems because the top levels of the B-Tree are all cached along with the frequently used blocks, so in most cases writes can be performed essentially lock-free.
 
 ---
 
@@ -315,13 +302,23 @@ r.db("blog").table("authors").get(ID)
 
 ???
 
-Advantages of using embedded arrays:
-The queries for accessing authors and posts tend to be simpler than when using multiple tables.
-When using this approach, the data is often colocated on disk. If you have a dataset that doesn't fit into RAM, the data can be loaded from disk faster.
-With this approach, any update to the authors document atomically updates both the author data and the posts data.
-Disadvantages of using embedded arrays:
-Any operation on an author document requires loading all posts into memory. Any update to the document requires rewriting the full array to disk.
-Because of the previous limitation, it's best to keep the size of the posts array to no more than a few hundred documents.
++
+
+* The queries for accessing authors and posts tend to be simpler
+  than when using multiple tables.
+* When using this approach, the data is often colocated on disk.
+  If you have a dataset that doesn't fit into RAM, the data can
+  be loaded from disk faster.
+* With this approach, any update to the authors document atomically
+  updates both the author data and the posts data.
+
+-
+
+* Any operation on an author document requires loading all posts
+  into memory. Any update to the document requires rewriting the
+  full array to disk.
+* Because of the previous limitation, it's best to keep the size
+  of the posts array to no more than a few hundred documents.
 
 ---
 
@@ -383,12 +380,18 @@ r.db('blog').table('authors').getAll(123).eqJoin(
 
 ???
 
-Advantages of using multiple tables:
-Operations on authors and posts don't require loading the data for every post for a given author into memory.
-There is no limitation on the number of posts, so this approach is more suitable for large amounts of data.
-Disadvantages of using multiple tables:
-The queries linking the data between the authors and their posts tend to more complicated.
-With this approach you cannot atomically update both the author data and and the posts data.
++
+
+* Operations on one table does not require loading the data
+  for whole object (author + his posts)
+* There is no limitation on the number of posts
+
+-
+
+* The queries linking the data between the authors and their posts
+  tend to more complicated.
+* With this approach you cannot atomically update both the author data
+  and and the posts data.
 
 ---
 
