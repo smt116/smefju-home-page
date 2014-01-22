@@ -32,26 +32,73 @@
         font-size: 36px;
       }
 
-      .remark-slide-content.smaller-fonts { padding: 0; }
-      .smaller-fonts .remark-code { font-size: 0.8em; }
+      .remark-slide-content.extend-code-pre,
+      .remark-slide-content.about {
+        padding: 0;
+      }
+      .extend-code-pre .remark-code {
+        font-size: 0.8em;
+        padding: 30px 60px;
+      }
+
+      .about .remark-code {
+        font-size: 1.2em;
+      }
+
+      .logo-big img {
+        height: 300px;
+      }
+      .logo-small img {
+        height: 60px;
+      }
     </style>
   </head>
   <body>
     <textarea id="source">
 
-class: center, middle
+class: middle, about, extend-code-pre
 
-# RethinkDB
-### Maciej Małecki
+#.center[Maciej Małecki]
 
-smt116@gmail.com
+```ruby
+about = {
+  homepage: 'smefju.pl',
+  email:    'smt116@gmail.com',
+  github:   'smt116',
+}
+```
 
 ---
 
 class: center, middle
 
+[.logo-big[![Uniwersytet Gdański](../common/ug.svg)]](http://ug.edu.pl)
+
+.corner-title[Maciej Małecki / smefju.pl]
+
+---
+
+class: center, middle
+
+[.logo-big[![Shelly Cloud](../common/shelly.png)]](https://shellycloud.com)
+
+.corner-title[Maciej Małecki / smefju.pl]
+
+---
+
+class: center, middle
+
+[![Ragnarson](../common/ragnarson.png)](http://ragnarson.com)
+
+.corner-title[Maciej Małecki / smefju.pl]
+
+---
+
+class: center, middle
+
+# RethinkDB
+
 ### *"An open-source distributed database built with love."*
-###### rethinkdb.com
 
 ---
 
@@ -61,10 +108,10 @@ class: center, middle
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 
 .corner-title[Simple programming model]
-### JSON data model
+###.center[JSON data model]
 
 ```json
 {
@@ -104,10 +151,13 @@ class: middle
 .corner-title[Simple programming model]
 ### Indexes...
 
-* simple
-* compound
-* multi
-* build with arbitrary expressions
+* **Simple indexes** *single field*
+
+* **Compound indexes** *multiple fields*
+
+* **Multi indexes** *arrays of values*
+
+* Indexes based on arbitrary expressions
 
 ---
 
@@ -142,6 +192,14 @@ class: middle
 .corner-title[Horizontal scalability]
 ### Replication to multiple nodes
 
+???
+
+RethinkDB allows you to shard and replicate your cluster on a per-table basis.
+
+Sharding a table is as easy as typing the number of shards you'd like in the web admin and clicking 'Rebalance'. RethinkDB rebalances the table, creates copies in the cluster, and moves necessary data around behind the scenes without any additional work from the user. Similarly, to change the number of replicas you simply set the number in the web UI and hit 'Save'.
+
+Sharding and replication settings can also be controlled from a powerful command-line interface: rethinkdb admin.
+
 ---
 
 class: middle
@@ -156,6 +214,12 @@ class: middle
 .corner-title[Horizontal scalability]
 ### Lock-free operation via MVCC concurrency.
 
+???
+
+To efficiently perform concurrent query execution RethinkDB implements block-level multiversion concurrency control (MVCC). Whenever a write operation occurs while there is an ongoing read, RethinkDB takes a snapshot of the B-Tree for each relevant shard and temporarily maintains different versions of the blocks in order to execute read and write operations concurrently. From the perspective of the applications written on top of RethinkDB, the system is essentially lock-free— you can run an hour-long analytics query on a live system without blocking any real-time reads or writes.
+
+RethinkDB does take exclusive block-level locks in case multiple writes are performed on documents that are close together in the B-Tree. If the contested block is cached in memory, these locks are extremely short-lived. If the blocks need to be loaded from disk, these locks take longer. Typically this does not present performance problems because the top levels of the B-Tree are all cached along with the frequently used blocks, so in most cases writes can be performed essentially lock-free.
+
 ---
 
 class: center, middle
@@ -166,16 +230,17 @@ http://www.rethinkdb.com/docs/install/
 
 ---
 
-class: middle, smaller-fonts
+class: middle, extend-code-pre
 
 ##.center[Running the server]
 
 ```bash
-~/repos/smefju-home-page/presentations/rethinkdb
- $ rethinkdb 
- info: Running rethinkdb 1.11.2-0ubuntu1~saucy (GCC 4.8.1)...
+~/repos/smefju-home-page/presentations (gh-pages)
+ $ rethinkdb
+ info: Running rethinkdb 1.11.3-1ubuntu1~saucy (GCC 4.8.1)...
  info: Running on Linux 3.11.0-12-generic x86_64
- info: Loading data from directory /home/smefju/tmp/rethinkdb/rethinkdb_data
+ info: Loading data from directory /home/smefju/repos/smefju-home-page/
+       presentations/rethinkdb_data
  info: Listening for intracluster connections on port 29015
  info: Listening for client driver connections on port 28015
  info: Listening for administrative HTTP connections on port 8080
@@ -214,6 +279,7 @@ http://www.rethinkdb.com/docs/data-modeling/
 class: center, middle
 
 ### Embedded arrays vs multiple tables
+###### MongoDB vs PostgreSQL ???
 
 ---
 
@@ -224,18 +290,17 @@ class: center, middle
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 .corner-title[Data modeling - embedded arrays]
 
-```json
+```ruby
 # authors table
 {
   id: 123,
-  name: "Maciek",
+  name: 'Maciek',
   posts: [
-    { title: "Introduction to RethinkDB" },
-    { title: "Neo4j as a graph Database" },
-    ...
+    { title: 'Introduction to RethinkDB' },
+    { title: 'Neo4j as a graph Database' },
   ]
 }
 ```
@@ -247,6 +312,17 @@ r.db("blog").table("authors")
 # Retrieve a single author with his posts
 r.db("blog").table("authors").get(ID)
 ```
+
+???
+
+Advantages of using embedded arrays:
+The queries for accessing authors and posts tend to be simpler than when using multiple tables.
+When using this approach, the data is often colocated on disk. If you have a dataset that doesn't fit into RAM, the data can be loaded from disk faster.
+With this approach, any update to the authors document atomically updates both the author data and the posts data.
+Disadvantages of using embedded arrays:
+Any operation on an author document requires loading all posts into memory. Any update to the document requires rewriting the full array to disk.
+Because of the previous limitation, it's best to keep the size of the posts array to no more than a few hundred documents.
+
 ---
 
 class: center, middle
@@ -256,7 +332,7 @@ class: center, middle
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 .corner-title[Data modeling - multiple tables]
 
 ```json
@@ -281,15 +357,10 @@ class: middle
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 .corner-title[Data modeling - multiple tables]
 
 ```ruby
-# with a secondary index on the `authors_id` field
-# in the `posts` table
-r.db("blog").table("posts").
-  getAll(123, {index: "authors_id"})
-
 # without a secondary index
 r.db("blog").table("posts").
   filter({"authors_id": 123})
@@ -298,14 +369,26 @@ r.db("blog").table("posts").
 ```ruby
 # with a secondary index on the `authors_id` field
 # in the `posts` table
+r.db("blog").table("posts").
+  getAll(123, {index: "authors_id"})
+
 r.db('blog').table('authors').getAll(123).eqJoin(
   'id',
   r.db('blog').table('posts'),
   {
     index:'authors_id'
   }
-).zip()
+)
 ```
+
+???
+
+Advantages of using multiple tables:
+Operations on authors and posts don't require loading the data for every post for a given author into memory.
+There is no limitation on the number of posts, so this approach is more suitable for large amounts of data.
+Disadvantages of using multiple tables:
+The queries linking the data between the authors and their posts tend to more complicated.
+With this approach you cannot atomically update both the author data and and the posts data.
 
 ---
 
@@ -317,22 +400,25 @@ http://www.rethinkdb.com/docs/install-drivers/
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 
-## Ruby
+##.center[Ruby]
 
 ```bash
+~/repos/smefju-home-page/presentations (gh-pages)
  $ gem install rethinkdb
-Fetching: ruby-protocol-buffers-1.5.1.gem (100%)
-Successfully installed ruby-protocol-buffers-1.5.1
-Fetching: rethinkdb-1.11.0.1.gem (100%)
-Successfully installed rethinkdb-1.11.0.1
+
+Fetching: varint-0.1.0.gem (100%)
+Building native extensions.  This could take a while...
+Successfully installed varint-0.1.0
+Fetching: rethinkdb-1.11.0.2.gem (100%)
+Successfully installed rethinkdb-1.11.0.2
 2 gems installed
 ```
 
 ---
 
-class: middle
+class: middle, extend-code-pre
 
 ```ruby
 require 'rubygems'
@@ -341,8 +427,11 @@ require 'rethinkdb'
 include RethinkDB::Shortcuts
 
 r.connect(host: 'localhost', port: 28015).repl
+
 db = r.db('test')
+
 db.table_create('students').run rescue nil
+
 db.table('students').insert({
   name:   'Maciek',
   index:  194930
@@ -365,11 +454,49 @@ https://github.com/rethinkdb/rethinkdb-example-sinatra-pastie
 
 ---
 
-class: center, middle
+class: middle, center
 
 ## Start a cluster
 
 http://www.rethinkdb.com/docs/start-a-cluster/
+
+---
+
+class: middle, extend-code-pre
+
+###.center[On a single machine]
+
+```bash
+ $ rethinkdb \
+    --port-offset 1 \
+    --directory rethinkdb_data2 \
+    --join localhost:29015
+```
+
+.corner-title[Start a cluster]
+
+---
+
+class: middle, extend-code-pre
+
+###.center[Using multiple machines]
+
+```bash
+ # on the first first machine
+
+ $ rethinkdb \
+    --bind all
+```
+
+```bash
+ # on the second machine
+
+ $ rethinkdb \
+    --join master_ip:29015 \
+    --bind all
+```
+
+.corner-title[Start a cluster]
 
 ---
 
@@ -383,23 +510,60 @@ http://www.rethinkdb.com/docs/comparison-tables/
 
 class: center, middle
 
-## The future
+## Use or not?
 
-http://www.rethinkdb.com/blog/funding/
+???
+
++
+
+* Flexible schema (schema-free)
+* Ease of use (json, webui)
+* lock-free
+
+* Scaling up to a sixteen-node cluster
+* Multi-datacenter
+
+-
+
+* full ACID support
+* strong schema enforcement (postgresql)
+* deep, computationally-intensive analytics (hadoop)
+* availabiility vs consistency (rethinkdb is consistency)
 
 ---
 
 class: center, middle
 
-### Maciej Małecki
+## Future
 
-smt116@gmail.com
+http://www.rethinkdb.com/blog/funding/
 
+---
+
+class: middle, extend-code-pre
+
+###.center[Maciej Małecki]
+
+```ruby
+about = {
+  homepage: 'smefju.pl',
+  email:    'smt116@gmail.com',
+  github:   'smt116',
+}
+```
+
+.center[
+.logo-small[[![Shelly Cloud](../common/shelly.png)](https://shellycloud.com)]
+.logo-small[[![Ragnarson](../common/ragnarson-small.png)](http://ragnarson.com)]
+.logo-small[[![Uniwersytet Gdański](../common/ug.svg)](http://ug.edu.pl)]
+]
     </textarea>
     <script src="http://gnab.github.io/remark/downloads/remark-0.5.9.min.js" type="text/javascript">
     </script>
     <script type="text/javascript">
-      var slideshow = remark.create();
+      var slideshow = remark.create({
+          highlightStyle: 'github'
+      });
     </script>
   </body>
 </html>
