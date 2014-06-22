@@ -28,6 +28,7 @@ body {
   font-size: 14px;
   color: #232323;
   background: #FBFAF7 url('../images/background.jpg') top center fixed;
+  background-size: cover;
   margin: 0;
   line-height: 1.8em;
   -webkit-font-smoothing: antialiased;
