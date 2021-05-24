@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    json (1.8.1)
+    json (2.5.1)
     rethinkdb (1.11.0.1)
       json
       ruby-protocol-buffers
