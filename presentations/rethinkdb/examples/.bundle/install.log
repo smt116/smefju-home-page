@@ -1,5 +1,0 @@
-# Logfile created on 2014-01-12 15:42:02 +0100 by logger.rb/44203
-I, [2014-01-12T15:42:02.809319 #22562]  INFO -- : 0:  json (1.8.1) from /home/smefju/.rvm/rubies/ruby-2.1.0/lib/ruby/gems/2.1.0/specifications/default/json-1.8.1.gemspec
-I, [2014-01-12T15:42:02.809865 #22562]  INFO -- : 0:  ruby-protocol-buffers (1.5.1) from /home/smefju/.rvm/gems/ruby-2.1.0/specifications/ruby-protocol-buffers-1.5.1.gemspec
-I, [2014-01-12T15:42:02.810230 #22562]  INFO -- : 0:  rethinkdb (1.11.0.1) from /home/smefju/.rvm/gems/ruby-2.1.0/specifications/rethinkdb-1.11.0.1.gemspec
-I, [2014-01-12T15:42:02.810580 #22562]  INFO -- : 0:  bundler (1.5.1) from /home/smefju/.rvm/gems/ruby-2.1.0@global/specifications/bundler-1.5.1.gemspec
