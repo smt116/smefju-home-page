@@ -10,38 +10,46 @@ body {
 }
 
 body {
-  background: #FBFAF7 url('../images/background.jpg') top center fixed;
-  background-size: cover;
-  text-align: center;
+  background-color: #91C499;
+  margin: 0;
+  padding: 2vh 10vw;
 }
 
 .card {
-  background-color: #FBFAF7;
-  opacity: 0.9;
-  padding: 20px;
-  display: inline-block;
-  margin-top: 20vh;
+  padding: 1vh 3vw;
+  width: 74vw;
+  min-width: 500px;
+
+  background-color: #f0fae6;
 }
 
-.social-icons {
-  text-align: center;
+.card .header {
+  display: flex;
+  justify-content: space-between;
+
+  border-bottom: 3px #494949 solid;
+}
+
+.card h1,
+.card .social-icons {
+  margin: 12px 0 6px 0;
+}
+
+.card h5 {
+  margin-top: 6px;
 }
 
 .social-icons li {
   display: inline-block;
   vertical-align: middle;
-  margin: 0 5px;
-}
-
-.social-icons li .separator {
-  border-left: 1px #aaa solid;
+  margin: 7px 4px;
 }
 
 .social-icons a,
 .social-icons svg {
   display: block;
-  height: 48px;
-  width: 48px;
+  height: 42px;
+  width: 42px;
 }
 
 .social-icons path {
@@ -57,20 +65,8 @@ body {
   transition: fill 0.5s ease;
 }
 
-.social-icons .facebook:hover path {
-  fill: #3b5998;
-}
-
 .social-icons .linkedin:hover path {
   fill: #007bb6;
-}
-
-.social-icons .twitter:hover path {
-  fill: #00aced;
-}
-
-.social-icons .youtube:hover path {
-  fill: #bb0000;
 }
 
 .social-icons .stackoverflow:hover polygon {
@@ -79,4 +75,19 @@ body {
 
 .social-icons .stackoverflow:hover path {
   fill: #F48023;
+}
+
+.cv {
+  border-left: 3px #91C499 solid;
+  padding-left: 12px;
+}
+
+.cv h3,
+.cv h4,
+.cv p {
+  margin: 3px 0 6px 0;
+}
+
+.cv a {
+  color: initial;
 }
